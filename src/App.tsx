@@ -1,4 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+import { configured } from './lib/supabase'
 import { Auth } from './pages/Auth'
 import { Overview } from './pages/Overview'
 import { Photos } from './pages/Photos'
@@ -12,6 +13,17 @@ import { Shell } from './pages/Shell'
 import { ToastProvider } from './ui'
 
 export default function App() {
+  if (!configured) {
+    return (
+      <div className="onboard">
+        <h1>Setup missing</h1>
+        <p className="hint">
+          This build has no Supabase settings. Add <code>VITE_SUPABASE_URL</code> and <code>VITE_SUPABASE_PUBLISHABLE_KEY</code> as
+          environment variables, then redeploy.
+        </p>
+      </div>
+    )
+  }
   return (
     <ToastProvider>
       <BrowserRouter>
