@@ -99,6 +99,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--enamel); outline
 .head-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .topbar { display: none; }
 
+.notice { background: #fff8e8; border: 1.5px solid #f0d28a; border-left: 5px solid var(--marigold); border-radius: 8px; padding: 12px 14px; margin-bottom: 22px; font-size: 0.92rem; }
 .section { margin-top: 32px; }
 .section > h2 { margin-bottom: 12px; }
 .panel { background: var(--card); border: 1.5px solid var(--line); border-radius: 10px; padding: 18px; }

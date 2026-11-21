@@ -7,6 +7,7 @@ import { linkGoogle, signInWithGoogle } from '../lib/google'
 import { supabase } from '../lib/supabase'
 import type { Loc } from '../lib/types'
 import { Btn, Loading, useBusy, useToast } from '../ui'
+import { ManualAdd } from './ManualAdd'
 
 type Google = { google_email: string | null; updated_at: string } | null
 
@@ -106,9 +107,11 @@ export function Shell() {
 
   const loc = locations.find((l) => l.id === locId) ?? locations[0]
 
-  if (!google || !loc) {
-    return <Onboarding connected={!!google} email={session.user.email ?? ''} onDone={reload} />
+  if (!loc) {
+    return <Onboarding connected={!!google} email={session.user.email ?? ''} userId={session.user.id} onDone={reload} />
   }
+
+  const manual = loc.google_location.startsWith('manual/')
 
   return (
     <Ctx.Provider
@@ -148,6 +151,13 @@ export function Shell() {
           </div>
         </aside>
         <main className="main">
+          {manual || !google ? (
+            <div className="notice" role="note">
+              <strong>{manual ? 'This business is not linked to Google yet.' : 'Google is not connected.'}</strong>{' '}
+              The review link and QR work now. Replies, posts, photos and stats start after Google approves Business Profile API access
+              and you connect your Google account in Settings.
+            </div>
+          ) : null}
           <Outlet />
         </main>
       </div>
@@ -155,7 +165,7 @@ export function Shell() {
   )
 }
 
-function Onboarding({ connected, email, onDone }: { connected: boolean; email: string; onDone: () => Promise<void> }) {
+function Onboarding({ connected, email, userId, onDone }: { connected: boolean; email: string; userId: string; onDone: () => Promise<void> }) {
   const { busy, run } = useBusy()
   const nav = useNavigate()
   return (
@@ -167,8 +177,9 @@ function Onboarding({ connected, email, onDone }: { connected: boolean; email: s
         <>
           <h1>No business found yet</h1>
           <p className="hint">
-            Google is connected, but no Business Profile locations came back. Make sure the Google account you connected owns or manages
-            the profile, then fetch again.
+            Google is connected, but no Business Profile locations came back. If you also saw a "Quota exceeded" error, Google has not
+            approved Business Profile API access for this app yet. That review can take up to 14 days, and fetching again will not help
+            until it is approved. Otherwise, make sure the Google account you connected owns or manages the profile.
           </p>
           <div className="actions">
             <Btn
@@ -205,6 +216,12 @@ function Onboarding({ connected, email, onDone }: { connected: boolean; email: s
           </div>
         </>
       )}
+      <ManualAdd userId={userId} onDone={onDone} />
+      {connected ? (
+        <div className="actions">
+          <Btn onClick={async () => { await supabase.auth.signOut(); nav('/') }}>Sign out ({email})</Btn>
+        </div>
+      ) : null}
     </div>
   )
 }
